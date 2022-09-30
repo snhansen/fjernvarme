@@ -1,0 +1,34 @@
+name: Create graphs
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Create graphs
+      run: |
+        python fjernvarme.py
+        
+    - name: Publish to GitHub pages
+      run: |
+        git clone https://snhansen:$TOKEN@github.com/snhansen/fjernvarme.git --branch gh-pages --single-branch gh-pages
+        cd gh-pages
+        git rm *
+        cp ../index.html .
+        git config --local user.email "stefannygaardhansen@gmail.com"
+        git config --local user.name "Stefan Nygaard Hansen"
+        git add .
+        git commit -m "Publish graphs" --amend
+        git push -f
+    env:
+      FJERN_USERID: ${{ secrets.FJERN_USERID }}
+      FJERN_PW: ${{ secrets.FJERN_PW }}
+      TOKEN: ${{ secrets.GITHUB_TOKEN }}
