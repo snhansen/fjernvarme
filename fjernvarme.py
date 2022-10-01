@@ -2,7 +2,7 @@ import requests
 import hashlib
 import plotly.express as px
 import numpy as np
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import os
 
 FJERN_USERID = os.environ['FJERN_USERID']
@@ -122,8 +122,11 @@ def make_daily_plot(data, range_dates = None, range_hours = (22, 26)):
         data = data[(range_hours[0] <= data[:, 5]) & (data[:, 5] <= range_hours[1]),:]
     if range_dates:
         data = data[(range_dates[0] <= data[:, 0]) & (data[:, 0] <= range_dates[1]),:]
-    fig = px.scatter(x = data[:,0], y = data[:,3], labels={"x": "Dato", "y": "Forbrug (kWh)"})
-    return fig
+    if data.size > 0:
+        fig = px.scatter(x = data[:,0], y = data[:,3], labels={"x": "Dato", "y": "Forbrug (kWh)"})
+        return fig
+    else:
+        return None
 
 def make_monthly_plot(data, range_dates = None):
     if range_dates:
@@ -131,39 +134,45 @@ def make_monthly_plot(data, range_dates = None):
     fig = px.scatter(x = data[:,0], y = data[:,1], labels={"x": "Dato", "y": "Forbrug (kWh)"})
     return fig
 
-    
-    
-
 today = datetime.today()
+last_day_prev_month = today.replace(day=1) - timedelta(days=1)
 current_month = (date(today.year, today.month, 1), today.date())
+prev_month = (date(last_day_prev_month.year, last_day_prev_month.month, 1), last_day_prev_month.date())
 current_year = (date(today.year, 1, 1), today.date())
+figs = []
 
 fig1 = make_daily_plot(daily_data, range_dates = current_month)
-fig1.update_layout(title_text="Forbrug per dag i indeværende måned", title_x=0.5)
+if fig1:
+    fig1.update_layout(title_text="Forbrug per dag i indeværende måned", title_x=0.5)
+    figs.append(fig1)
 # fig1.write_html("daily_usage_this_month.html")
 
-fig2 = make_daily_plot(daily_data, range_dates = current_year)
-fig2.update_layout(title_text="Forbrug per dag i indeværende år", title_x=0.5)
-# fig2.write_html("daily_usage_this_year.html")
+fig2 = make_daily_plot(daily_data, range_dates = prev_month)
+fig2.update_layout(title_text="Forbrug per dag i forrige måned", title_x=0.5)
+figs.append(fig2)
+# fig2.write_html("daily_usage_prev_month.html")
 
-fig3 = make_daily_plot(daily_data)
-fig3.update_layout(title_text="Forbrug per dag altid", title_x=0.5)
-# fig3.write_html("daily_usage_all_time.html")
+fig3 = make_daily_plot(daily_data, range_dates = current_year)
+fig3.update_layout(title_text="Forbrug per dag i indeværende år", title_x=0.5)
+figs.append(fig3)
+# fig3.write_html("daily_usage_this_year.html")
+
+fig4 = make_daily_plot(daily_data)
+fig4.update_layout(title_text="Forbrug per dag altid", title_x=0.5)
+figs.append(fig4)
+# fig4.write_html("daily_usage_all_time.html")
 
 current_year = (date(today.year, 1, 1), date(today.year, today.month, 1))
-fig4 = make_monthly_plot(monthly_data, current_year)
-fig4.update_layout(title_text="Forbrug per måned i indeværende år", title_x=0.5)
-# fig4.write_html("monthly_usage_this_year.html")
+fig5 = make_monthly_plot(monthly_data, current_year)
+fig5.update_layout(title_text="Forbrug per måned i indeværende år", title_x=0.5)
+figs.append(fig5)
+# fig5.write_html("monthly_usage_this_year.html")
 
-fig5 = make_monthly_plot(monthly_data)
-fig5.update_layout(title_text="Forbrug per måned altid", title_x=0.5)
-# fig5.write_html("monthly_usage_all_time.html")
+fig6 = make_monthly_plot(monthly_data)
+fig6.update_layout(title_text="Forbrug per måned altid", title_x=0.5)
+figs.append(fig6)
+# fig6.write_html("monthly_usage_all_time.html")
 
 with open('index.html', 'w') as f:
-    f.write(fig1.to_html(full_html=False))
-    f.write(fig2.to_html(full_html=False))
-    f.write(fig3.to_html(full_html=False))
-    f.write(fig4.to_html(full_html=False))
-    f.write(fig5.to_html(full_html=False))
-
-print(os.path.exists('index.html'))
+    for fig in figs:
+        f.write(fig.to_html(full_html=False))
