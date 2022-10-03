@@ -3,6 +3,7 @@ import hashlib
 import plotly.express as px
 import pandas as pd
 from datetime import date, datetime, timedelta
+import os
 
 FJERN_USERID = os.environ['FJERN_USERID']
 FJERN_PW = os.environ['FJERN_PW']
