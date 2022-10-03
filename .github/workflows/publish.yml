@@ -3,7 +3,7 @@ name: Create graphs
 # on: workflow_dispatch 
 on:
   schedule:
-   - cron: '0 6,8,10,12 * * *'
+   - cron: '0 4,6,8,10 * * *'
 
 jobs:
   build:
