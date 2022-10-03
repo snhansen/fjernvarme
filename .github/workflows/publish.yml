@@ -1,9 +1,9 @@
 name: Create graphs
 
-# on: workflow_dispatch 
-on:
-  schedule:
-   - cron: '0 4,6,8,10 * * *'
+on: workflow_dispatch 
+# on:
+#  schedule:
+#   - cron: '0 4,6,8,10 * * *'
 
 jobs:
   build:
