@@ -153,7 +153,7 @@ figs.append(fig3)
 
 fig4 = make_plot(daily_data)
 fig4.update_layout(title_text="Forbrug per dag altid", title_x=0.5, coloraxis_colorbar=dict(title="Antal timer", tickvals=[0, 10, 20, 30, 40, 50]))
-figs.append(fig3)
+figs.append(fig4)
 
 current_year = (date(today.year, 1, 1), date(today.year, today.month, 1))
 fig5 = make_plot(monthly_data, range_dates=current_year, daily=False)
